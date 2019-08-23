@@ -21,7 +21,7 @@ export default class KiddushLevana extends React.Component {
 		  hebrewYear: '',
 		  moladJlem: Date,
 		  timeStampJlem: -1, //ts of molad in jlem this month
-		  moladByYou: Date,
+		  moladByYou: null,
         }
         this.getMoladByUser = this.getMoladByUser.bind(this)
       }
@@ -146,7 +146,7 @@ export default class KiddushLevana extends React.Component {
 					<p>Hebrew Year: {this.state.hebrewYear}</p>
                     <p>molad in jlem: {this.state.molad}</p>
 					<p>molad by you: {this.state.moladByYou}</p> */}
-					<KiddushLevanaCalendar/>
+					{this.state.moladByYou ? <KiddushLevanaCalendar molad={this.state.moladByYou}/> : null}
           </div>
       );
     }
