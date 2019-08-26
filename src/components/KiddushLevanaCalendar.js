@@ -36,6 +36,10 @@ export default class KiddushLevanaCalendar extends React.Component {
 		};
 	}
 
+	slotSelected(event){
+		console.log(event.title);
+	}
+
     render() {
 		var [start3, end3] = this.getStartAndEnd(3);
 		var [start7, end7] = this.getStartAndEnd(7);
@@ -46,6 +50,7 @@ export default class KiddushLevanaCalendar extends React.Component {
           	<div>
 				  <br/>
 				  <br/>
+				  {/* how do you select particular events? */}
 				<Calendar style={{height: "500px"}}
 					localizer={localizer}
 					events={[{
@@ -68,6 +73,7 @@ export default class KiddushLevanaCalendar extends React.Component {
 					  }]}
 					startAccessor="start"
 					endAccessor="end"
+					step={5}
 					eventPropGetter={this.eventStyleGetter}
 					/>
           	</div>

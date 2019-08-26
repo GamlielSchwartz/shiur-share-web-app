@@ -1,12 +1,20 @@
 import React from 'react';
 import calcMolad from './calcMolad.js';
 import KiddushLevanaCalendar from './KiddushLevanaCalendar';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { HDate } from 'hebcal';
+ 
+require('hebcal');
+var geoTz = require('geo-tz')
 
 var API_KEY = "ZOB2F8MCNS32";
 var GET_TZ_API = `http://api.timezonedb.com/v2.1/get-time-zone?key=${API_KEY}&format=json&by=position`;
+//TODO: this can use hebcal library in stead of api call greg.js and hdate.js
 var DATE_CONV_API = "https://www.hebcal.com/converter/?cfg=json";
 var TZ_CONV_API = `http://api.timezonedb.com/v2.1/convert-time-zone?key=${API_KEY}&format=json`;
 var JLEM_TZ = "Asia/Jerusalem";
+
+
 
 
 export default class KiddushLevana extends React.Component {
@@ -19,11 +27,11 @@ export default class KiddushLevana extends React.Component {
 		  jlemMoladToHereTime: '',
 		  hebrewMonth: '',
 		  hebrewYear: '',
-		  moladJlem: Date,
+		  moladJlem: null,
 		  timeStampJlem: -1, //ts of molad in jlem this month
 		  moladByYou: null,
         }
-        this.getMoladByUser = this.getMoladByUser.bind(this)
+        this.getMoladByUserWithGeolocation = this.getMoladByUserWithGeolocation.bind(this)
       }
 
 	  //TODO: double check algorithm
@@ -69,50 +77,80 @@ export default class KiddushLevana extends React.Component {
 		}
 	  }
 
+	//   getMoladJlem(){
+	// 	var gregorianDate = new Date();
+	// 	var gMonth = gregorianDate.getMonth() + 1;
+	// 	var gYear = gregorianDate.getFullYear();
+	// 	var gDay = gregorianDate.getDate();
+	// 	//convert gregorian day to hebrew day:
+	// 	var apiCall = `${DATE_CONV_API}&gy=${gYear}&gm=${gMonth}&gd=${gDay}&g2h=1`
+	// 	fetch(apiCall)
+	// 	.then(response => response.json())
+	// 	.then(data => {
+	// 		var hebrewYear = data.hy;
+	// 		var hebrewMonth = data.hm;
+	// 		var isLeapYear = this.isLeapYear(hebrewYear);
+	// 		var hmAsNumber = this.getHmAsNumber(hebrewMonth, isLeapYear);
+	// 		//molad in JLEM, need api call to convert to local
+	// 		var molad = calcMolad(hebrewYear, hmAsNumber);
+
+
+	// 		console.log(molad);
+	// 		this.setState({
+	// 			hebrewMonth: hebrewMonth.toString(),
+	// 			hebrewYear: hebrewYear.toString(),
+	// 			moladJlem: molad,
+	// 			timeStampJlem: molad.getTime(),
+	// 		})
+	// 	});
+	//   }
+
 	  getMoladJlem(){
-		var gregorianDate = new Date();
-		var gMonth = gregorianDate.getMonth() + 1;
-		var gYear = gregorianDate.getFullYear();
-		var gDay = gregorianDate.getDate();
-		//convert gregorian day to hebrew day:
-		var apiCall = `${DATE_CONV_API}&gy=${gYear}&gm=${gMonth}&gd=${gDay}&g2h=1`
-		fetch(apiCall)
-		.then(response => response.json())
-		.then(data => {
-			var hebrewYear = data.hy;
-			var hebrewMonth = data.hm;
-			var isLeapYear = this.isLeapYear(hebrewYear);
-			var hmAsNumber = this.getHmAsNumber(hebrewMonth, isLeapYear);
-			//molad in JLEM, need api call to convert to local
-			var molad = calcMolad(hebrewYear, hmAsNumber);
-			console.log(molad);
-			this.setState({
-				hebrewMonth: hebrewMonth.toString(),
-				hebrewYear: hebrewYear.toString(),
-				moladJlem: molad,
-				timeStampJlem: molad.getTime(),
-			})
-		});
+		this.withoutAPI();
 	  }
 
-      componentDidMount() {
+	numMonthsThisYear(year){
+		if (this.isLeapYear(year)) return 13;
+		return 12;
+	  }
+
+	  withoutAPI(){
+		const d = new HDate();
+		//Hdate numbers start with adar as 0, calcmolad numbers tishrei as 0
+		var transformedForCalc = d.month + 7;
+		var transformedYear = d.year;
+		if (transformedForCalc > this.numMonthsThisYear(d.year)){
+		  transformedForCalc -= this.numMonthsThisYear(d.year);
+		  transformedYear += 1;
+		}
+		
+		var molad = calcMolad(transformedYear, transformedForCalc);
+		this.setState({
+			moladJlem: molad,
+			moladByYou: molad, //start off displaying Jerusalem, then go to other location
+			timeStampJlem: molad.getTime(),
+		})
+		console.log(molad);
+	  }
+
+      componentDidMount() {		
 		this.getMoladJlem();
-        this.getMoladByUser();
+		//if user presses button to use curr location:
+        this.getMoladByUserWithGeolocation();
       }
     
-      getMoladByUser() {
+      getMoladByUserWithGeolocation() {
         const location = window.navigator && window.navigator.geolocation
         
         if (location) {
           location.getCurrentPosition((position) => {
-		   //get time zone of user in order to check time diff:
-			var apiCall = `${GET_TZ_API}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
-            fetch(apiCall)
-            .then(response => response.json())
-            .then(data => {
-				this.setState({timeZone: data.zoneName})
+			  console.log("got here")
+			  console.log(position);
+				console.log(geoTz(position.coords.latitude, position.coords.longitude));
+				var zoneName = geoTz(position.coords.latitude, position.coords.longitude);
+				this.setState({timeZone: zoneName})
 				//convert times from one zone to another:
-				apiCall = `${TZ_CONV_API}&from=${JLEM_TZ}&to=${data.zoneName}&time=${this.state.timeStampJlem/1000}`;
+				var apiCall = `${TZ_CONV_API}&from=${JLEM_TZ}&to=${zoneName}&time=${this.state.timeStampJlem/1000}`;
 				fetch(apiCall)
 				.then(response => response.json())
 				.then(data => {
@@ -121,7 +159,6 @@ export default class KiddushLevana extends React.Component {
 						moladByYou: new Date(data.toTimestamp * 1000),
 					})
 				})
-            })
             this.setState({
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
@@ -136,17 +173,12 @@ export default class KiddushLevana extends React.Component {
       }
 
     render() {
+
       return (
           <div>
-                    {/* <p>{this.state.latitude}</p>
-					<p>{this.state.longitude}</p> */}
-					
-                    {/* <p>time zone: {this.state.timeZone}</p>
-					<p>Hebrew Month: {this.state.hebrewMonth}</p>
-					<p>Hebrew Year: {this.state.hebrewYear}</p>
-                    <p>molad in jlem: {this.state.molad}</p>
-					<p>molad by you: {this.state.moladByYou}</p> */}
-					{this.state.moladByYou ? <KiddushLevanaCalendar molad={this.state.moladByYou}/> : null}
+					{this.state.moladByYou 
+						? <KiddushLevanaCalendar molad={this.state.moladByYou}/> 
+						: <LinearProgress color="secondary" />}
           </div>
       );
     }
