@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { makeStyles, useTheme, fade } from '@material-ui/core/styles';
+import { makeStyles, fade } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
@@ -122,12 +122,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function SideNav(props) {
-	// console.log(document.getElementsByTagName("input"));
-	// console.log(document.getElementsByTagName("input"));
-	// if (document.getElementsByTagName("input")[1]){
-	// 	document.getElementsByTagName("input")[1].autofocus=true;
-	// 	console.log(document.getElementsByTagName("input")[1]);
-	// }
 	const classes = useStyles();
 	const [open, setOpen] = React.useState(true);
 	const [zipcode, setZipcode] = React.useState('');
@@ -162,7 +156,6 @@ export default function SideNav(props) {
 	}
 
 	function handleCalendarClick() {
-		console.log("SSS")
 		setShowDatepicker(true);
 	}
 
@@ -179,31 +172,31 @@ export default function SideNav(props) {
 			>
 				<div className={classes.drawerHeader}>
 					Molad and Kiddush Levana Times
-          <IconButton onClick={handleDrawerClose}>
+					<IconButton onClick={handleDrawerClose}>
 						<Cancel />
 					</IconButton>
 				</div>
 				<Divider />
 				{getMoladInfo()}
-
 			</Drawer>
 		);
 	}
 
-	function numToDay(num) {
-		const daysArray = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'];
-		return daysArray[num];
-	}
+	// function numToDay(num) {
+	// 	const daysArray = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'];
+	// 	return daysArray[num];
+	// }
 
-	function numToMonth(num) {
-		const monthsArray = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-		return monthsArray[num];
-	}
+	// function numToMonth(num) {
+	// 	const monthsArray = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+	// 	return monthsArray[num];
+	// }
 
 
 	function getHumanReadable(time) {
-		var [month, dayAsWord, dayAsNum, hour, minutes, second] = [numToMonth(time.getMonth()), numToDay(time.getDay()), time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()];
-		return `${dayAsWord}, ${month} ${dayAsNum} (${hour}:${minutes}:${second})`;
+		return time.toString().substring(0, time.toString().indexOf("G"));
+		// var [month, dayAsWord, dayAsNum, hour, minutes, second] = [numToMonth(time.getMonth()), numToDay(time.getDay()), time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()];
+		// return `${dayAsWord}, ${month} ${dayAsNum} (${hour}:${minutes}:${second})`;
 	}
 
 	function getMoladInfo() {
@@ -249,7 +242,7 @@ export default function SideNav(props) {
 					</IconButton>
 					<Typography variant="h6" noWrap>
 						Kiddush Levana App
-          </Typography>
+         			</Typography>
 					<div className={classes.search}>
 						<div className={classes.searchIcon}>
 							<IconButton color="inherit">
@@ -299,12 +292,10 @@ export default function SideNav(props) {
 							disableRestoreFocus
 						>
 							<Typography>Click to choose a different date.</Typography>
-
 						</Popover>
 					</div>
 				</Toolbar>
 			</AppBar>
-
 			{getSidebar()}
 			<main
 				className={clsx(classes.content, {
@@ -314,7 +305,7 @@ export default function SideNav(props) {
 				<div className={classes.drawerHeader} />
 				{props.innerComponent}
 			</main>
-			{showDatepicker ? <Alert message={<DayPicker onDayClick={props.setNewDate} />} resetAlert={() => setShowDatepicker(false)} /> : null}
+			{showDatepicker ? <Alert message={<DayPicker onDayClick={props.setNewDate} />} resetAlert={() => setShowDatepicker(false)} header="Pick a date" /> : null}
 		</div>
 	);
 }

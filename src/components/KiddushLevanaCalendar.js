@@ -1,50 +1,72 @@
 import React from 'react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { Calendar, Views, momentLocalizer } from 'react-big-calendar'
+import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment';
+import { HDate } from 'hebcal';
+require('hebcal');
 
 
 export default class KiddushLevanaCalendar extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			molad: this.props.molad,
-			start1: null,
-			start3: null,
-			start7: null,
-			end1: null,
-			end3: null,
-			end7: null
+			eventsThisYear: [],
+			moladosThisYear: []
 		}
 	}
 
 	componentDidMount(){
-		if (this.props.molad){
-			this.updateCalendar();
+		if(this.props.moladosThisYear){
+			this.setCalendar();
 		}
 	}
-
-	updateCalendar(){
-		var [start3, end3] = this.getStartAndEnd(3, this.props.molad);
-		var [start7, end7] = this.getStartAndEnd(7, this.props.molad);
-		var [start1, end1] = this.getStartAndEnd(1, this.props.molad);
-		this.setState(
-			{
-				molad: this.props.molad,
-				start1: start1,
-				start3: start3,
-				start7: start7,
-				end1: end1,
-				end3: end3,
-				end7: end7
+	
+	setCalendar(){
+		var newEvents = [];
+		for (var i = 0; i < this.props.moladosThisYear.length; i++){
+			var oneMonthEvents = this.createEventsForOneHebrewMonth(this.props.moladosThisYear[i]);
+			for (var j = 0; j < oneMonthEvents.length; j++){
+				newEvents.push(oneMonthEvents[j]);
 			}
-			);
+		}
+		this.setState({
+			eventsThisYear: newEvents,
+			moladosThisYear: this.props.moladosThisYear
+		})
+	}
+
+	createEventsForOneHebrewMonth(molad){
+		var [start1, end1] = this.getStartAndEnd(1, molad);
+		var [start3, end3] = this.getStartAndEnd(3, molad);
+		var [start7, end7] = this.getStartAndEnd(7, molad);
+		return [
+			{
+				title: "Rama",
+				start: start3,
+				end: end3,
+				color: 'black',
+				bgColor: '#55D6BE',
+			},
+			{
+				title: "Shulchan Aruch",
+				start: start7,
+				end: end7,
+				bgColor: "#2E5EAA",
+				color: 'white',
+			},
+			{
+				title: "leniant opinion",
+				start: start1,
+				end: end1,
+				bgColor: "#152A80",
+				color: 'white',
+			}
+		]
 	}
 
 	componentDidUpdate(){
-		console.log("update")
-		if (this.props.molad && this.props.molad !== this.state.molad){
-			this.updateCalendar();
+		if (this.props.moladosThisYear && this.props.moladosThisYear !== this.state.moladosThisYear){
+			this.setCalendar();
 		}
 	}
 
@@ -61,13 +83,18 @@ export default class KiddushLevanaCalendar extends React.Component {
 		var style = {
 			backgroundColor: event.bgColor,
 			opacity: 0.8,
-			color: 'black',
+			color: event.color,
 			border: '0px',
 			display: 'block'
 		};
 		return {
 			style: style
 		};
+	}
+
+	setNewHebrewYear(dateOnCalendar){
+		var hebrewYear = new HDate(dateOnCalendar);
+		this.props.setNewDate(dateOnCalendar);
 	}
 
 	render() {
@@ -79,26 +106,11 @@ export default class KiddushLevanaCalendar extends React.Component {
 				{/* how do you select particular events? */}
 				<Calendar style={{ height: "600px" }}
 					// toolbar={null}
-					date={this.state.molad}
+					defaultDate={this.props.defDate}
+					onNavigate={this.setNewHebrewYear.bind(this)}
 					localizer={localizer}
-					events={[{
-						title: "From 3 Days",
-						start: this.state.start3,
-						end: this.state.end3,
-						bgColor: 'red',
-					},
-					{
-						title: "From 7 Days",
-						start: this.state.start7,
-						end: this.state.end7,
-						bgColor: "blue",
-					},
-					{
-						title: "From 1 Day",
-						start: this.state.start1,
-						end: this.state.end1,
-						bgColor: "green",
-					}]}
+					events={this.state.eventsThisYear}
+					views={['month']}
 					startAccessor="start"
 					endAccessor="end"
 					eventPropGetter={this.eventStyleGetter}
