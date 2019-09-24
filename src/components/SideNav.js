@@ -10,17 +10,14 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import DateRange from '@material-ui/icons/DateRange';
 import WatchLater from '@material-ui/icons/WatchLater';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { getStartAndEnd } from '../utils/moladCalcs.js';
 import DisplayCard from './DisplayCard.js';
 import Cancel from '@material-ui/icons/Cancel';
-import { InputBase, Popover } from '@material-ui/core';
-import DayPicker from 'react-day-picker';
+import { InputBase } from '@material-ui/core';
 import 'react-day-picker/lib/style.css';
-import Alert from './Alert.js';
+import { HDate } from 'hebcal';
+import { getHebMonthAsString } from '../utils/tools.js';
 
 const drawerWidth = 300;
 
@@ -125,17 +122,6 @@ export default function SideNav(props) {
 	const classes = useStyles();
 	const [open, setOpen] = React.useState(true);
 	const [zipcode, setZipcode] = React.useState('');
-	const [anchorEl, setAnchorEl] = React.useState(null);
-	const openPopover = Boolean(anchorEl);
-	const [showDatepicker, setShowDatepicker] = React.useState(false);
-
-	function handlePopoverOpen(event) {
-		setAnchorEl(event.currentTarget);
-	}
-
-	function handlePopoverClose() {
-		setAnchorEl(null);
-	}
 
 	function handleDrawerOpen() {
 		setOpen(true);
@@ -153,10 +139,6 @@ export default function SideNav(props) {
 		if (key === 'Enter') {
 			props.setZipcode(zipcode);
 		}
-	}
-
-	function handleCalendarClick() {
-		setShowDatepicker(true);
 	}
 
 	function getSidebar() {
@@ -182,40 +164,43 @@ export default function SideNav(props) {
 		);
 	}
 
-	// function numToDay(num) {
-	// 	const daysArray = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'];
-	// 	return daysArray[num];
-	// }
-
-	// function numToMonth(num) {
-	// 	const monthsArray = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-	// 	return monthsArray[num];
-	// }
-
-
 	function getHumanReadable(time) {
-		return time.toString().substring(0, time.toString().indexOf("G"));
-		// var [month, dayAsWord, dayAsNum, hour, minutes, second] = [numToMonth(time.getMonth()), numToDay(time.getDay()), time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()];
-		// return `${dayAsWord}, ${month} ${dayAsNum} (${hour}:${minutes}:${second})`;
+		var chalakim = Math.round((time.getSeconds()) / (3.333));
+		if (chalakim === 18) {
+			chalakim = 0;
+		}
+		var fullTime = time.toString().substring(0, time.toString().indexOf("G"));
+		var dateSection = fullTime.substring(0, fullTime.length - 10);
+		var timeSection = fullTime.substring(fullTime.length - 9, fullTime.length - 4);
+		var asStringArray = timeSection.trim().split(":");
+		var minutes = asStringArray[1];
+		var militaryHour = parseInt(asStringArray[0]); 
+		var hour = militaryHour <= 12 ? militaryHour : militaryHour - 12;
+		var pmOrAm = militaryHour <= 12 ? "am" : "pm";
+		if (hour === 0) hour = 12; 
+
+		return `${dateSection} at ${hour}:${minutes} ${pmOrAm} and ${chalakim} chalakim`;
 	}
 
 	function getMoladInfo() {
-		if (!props.moladInfo.molad) return null;
-		getHumanReadable(props.moladInfo.molad);
-		var [ShA_start, ShA_end] = getStartAndEnd(props.moladInfo.molad, 7, 15);
-		var [Rama_start, Rama_end] = getStartAndEnd(props.moladInfo.molad, 3, 14.6);//TODO: get exact time for Rama
-
+		if (!props.sidebarData) return (
+			<DisplayCard basic={true} message="Click an opinion in the calendar to see exact times and explanations" />
+		);
+		var data = props.sidebarData;
+		var molad = data.opinion.molad;
+		var aFewDaysAfterMolad = new Date(molad.getTime() + (3 * 24 * 60 * 60 * 1000));
+		var upcomingHebMonthAsNum = new HDate(aFewDaysAfterMolad);
+		var upcomingHebMonthAsString = getHebMonthAsString(upcomingHebMonthAsNum);
 		return (
 			<List>
 				<ListItem>
-					<ListItemText primary={`Molad in ${props.moladInfo.location}:`} />
-					<DisplayCard basic={true} posek="Rama" header={`Molad in ${props.moladInfo.location}:`} message={getHumanReadable(props.moladInfo.molad)} />
+					<DisplayCard basic={true} header={null} message={`Hebrew month: ${upcomingHebMonthAsString}`} />
 				</ListItem>
 				<ListItem>
-					<DisplayCard posek="Shulchan Aruch" start={getHumanReadable(ShA_start)} end={getHumanReadable(ShA_end)} />
+					<DisplayCard basic={true} header={`Molad in ${data.location}:`} message={getHumanReadable(molad)} />
 				</ListItem>
 				<ListItem>
-					<DisplayCard posek="Rama" start={getHumanReadable(Rama_start)} end={getHumanReadable(Rama_end)} />
+					<DisplayCard posek={data.opinion.title} start={getHumanReadable(data.opinion.start)} end={getHumanReadable(data.opinion.end)} />
 				</ListItem>
 			</List>
 		)
@@ -260,40 +245,6 @@ export default function SideNav(props) {
 							onKeyDown={(event) => handleZipcodeEnter(event.key)}
 						/>
 					</div>
-					<IconButton
-						color="inherit"
-						aria-owns={openPopover ? 'mouse-over-popover' : undefined}
-						aria-haspopup="true"
-						onMouseEnter={handlePopoverOpen}
-						onMouseLeave={handlePopoverClose}
-						onClick={handleCalendarClick}
-					>
-						<DateRange />
-					</IconButton>
-
-					<div>
-						<Popover
-							id="mouse-over-popover"
-							className={classes.popover}
-							classes={{
-								paper: classes.paper,
-							}}
-							open={openPopover}
-							anchorEl={anchorEl}
-							anchorOrigin={{
-								vertical: 'bottom',
-								horizontal: 'left',
-							}}
-							transformOrigin={{
-								vertical: 'top',
-								horizontal: 'left',
-							}}
-							onClose={handlePopoverClose}
-							disableRestoreFocus
-						>
-							<Typography>Click to choose a different date.</Typography>
-						</Popover>
-					</div>
 				</Toolbar>
 			</AppBar>
 			{getSidebar()}
@@ -305,7 +256,6 @@ export default function SideNav(props) {
 				<div className={classes.drawerHeader} />
 				{props.innerComponent}
 			</main>
-			{showDatepicker ? <Alert message={<DayPicker onDayClick={props.setNewDate} />} resetAlert={() => setShowDatepicker(false)} header="Pick a date" /> : null}
 		</div>
 	);
 }

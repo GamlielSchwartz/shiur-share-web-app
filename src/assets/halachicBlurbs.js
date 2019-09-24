@@ -1,0 +1,3 @@
+const SH_AR_WHEN_CAN_START_KL = "The Shulchan Aruch in Orach Chaim 4:426:4 (חלק ד סימן תכו סעיף ד) is of the opinion that one is not allowed to say Kiddush Levana until 7 days after the molad. According to the Kaf haChaim, this means seven 24-hour periods. This is a minority opinion.";
+const ROV_ACHARONIM_WHEN_CAN_START_KL = "See Mishnah Berurah 4:426 Sif Koton 20 (חלק ד סימן תכו ס״ק כ ושער הציון שם) that according to most Acharonim, one is allowed to say Kiddush Levana from 3 days (three 24-hour periods) from the molad. This is the majority opinion.";
+export { SH_AR_WHEN_CAN_START_KL, ROV_ACHARONIM_WHEN_CAN_START_KL };

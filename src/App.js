@@ -7,44 +7,44 @@ export default class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			moladInfo: {
-				molad: null,
-				location: 'Jerusalem',
-			},
 			currZipcode: '',
 			newDate: null,
+			sidebarData: null,
 		}
-		this.setMolad = this.setMolad.bind(this);
 		this.setZipcode = this.setZipcode.bind(this);
 		this.setNewDate = this.setNewDate.bind(this);
-	}
-
-	setMolad(moladInfo) {
-		this.setState({ moladInfo: moladInfo });
+		this.setSidebarData = this.setSidebarData.bind(this);
 	}
 
 	setZipcode(zipcode) {
-		this.setState({ currZipcode: zipcode });
+		this.setState({ 
+			currZipcode: zipcode,
+			sidebarData: null,
+			//reset sidebar on change, easiest thing to do, would be better to change sidebar data
+		});
 	}
 
 	setNewDate(date) {
 		this.setState({ newDate: date });
 	}
 
+	setSidebarData(data){
+		this.setState({sidebarData: data});
+	}
+
 	render() {
 		return (
 			<div>
 				<SideNav
-					moladInfo={this.state.moladInfo}
 					setZipcode={this.setZipcode}
-					setNewDate={this.setNewDate}
+					sidebarData={this.state.sidebarData}
 					innerComponent=
-					{<KiddushLevana
-						setMoladInSidebar={this.setMolad}
-						zipcode={this.state.currZipcode}
-						setNewDate={this.setNewDate}
-						newDate={this.state.newDate}
-					/>}
+						{<KiddushLevana
+							zipcode={this.state.currZipcode}
+							setNewDate={this.setNewDate}
+							newDate={this.state.newDate}
+							setSidebarData={this.setSidebarData}
+						/>}
 				/>
 			</div>
 		);

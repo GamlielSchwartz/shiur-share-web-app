@@ -6,6 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Alert from './Alert';
+import { SH_AR_WHEN_CAN_START_KL, ROV_ACHARONIM_WHEN_CAN_START_KL } from '../assets/halachicBlurbs';
 
 const useStyles = makeStyles({
   card: {
@@ -15,6 +16,14 @@ const useStyles = makeStyles({
     fontSize: 14,
   },
 });
+
+function getMessage(posek){
+  if (posek === 'Shulchan Aruch'){
+    return SH_AR_WHEN_CAN_START_KL;
+  } else if (posek === 'Majority') {
+    return ROV_ACHARONIM_WHEN_CAN_START_KL;
+  }
+}
 
 export default function DisplayCard(props) {
   const classes = useStyles();
@@ -39,21 +48,25 @@ export default function DisplayCard(props) {
     <Card className={classes.card}>
         {alertOn 
         ? 
-        <Alert header={`Opinion of ${props.posek}`} message="some pretty good explanation of why the times are different..." resetAlert={()=> setAlertOn(false)}/> 
+        <Alert header={`Opinion of ${props.posek}`} message={getMessage(props.posek)} resetAlert={()=> setAlertOn(false)}/> 
         : null}
       <CardContent>
         <Typography className={classes.title} color="textSecondary" gutterBottom>
           {`Opinion of ${props.posek}`}
         </Typography>
-        <Typography variant="h5" component="h2">
-          Earliest: 
-          <br />
-          {props.start}
-          <br /><br />
-          Latest: 
-          <br />
-          {props.end}
+        <Typography variant="h6" component="h2">
+          Earliest Kiddush Levana: 
         </Typography>
+          <Typography variant="body2" component="p">
+          {props.start}
+          </Typography>
+          <br /><br />
+          <Typography variant="h6" component="h2">
+          Latest Kiddush Levana: 
+          </Typography>
+          <Typography variant="body2" component="p">
+          {props.end}
+          </Typography>
       </CardContent>
       <CardActions>
         <Button size="small" onClick={() => setAlertOn(true)}>Learn More</Button>

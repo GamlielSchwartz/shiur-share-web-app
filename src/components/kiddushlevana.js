@@ -1,10 +1,10 @@
 import React from 'react';
 import calcMolad from './calcMolad.js';
 import KiddushLevanaCalendar from './KiddushLevanaCalendar';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import { HDate } from 'hebcal';
-import Alert from './Alert.js';
-import { formatRFC, getTransformedMonth, RFCToDateObj, numMonthsInYear } from '../utils/tools.js';
+import { formatRFC, RFCToDateObj, numMonthsInYear } from '../utils/tools.js';
+import ChangeZipSnack from './ChangeZipSnack.js';
+
 var zipcodes = require('zipcodes');
 var tzlookup = require("tz-lookup");
 var tz = require('timezone/loaded');
@@ -19,55 +19,75 @@ export default class KiddushLevana extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			latitude: '',
-			longitude: '',
 			timeZone: '',
-			jlemMoladToHereTime: '',
-			hebrewMonth: '',
-			hebrewYear: '',
-			moladJlem: null,
-			moladAsRFCString: '',
-			timeStampJlem: -1, //ts of molad in jlem this month
-			moladByYou: null,
 			displayedCity: "Jerusalem",
-			showAlert: false,
 			displayedZip: '',
 			newDate: new Date(),
 			moladosThisYear: [],
+			currYear: new HDate().year,
+			snackData: {
+				message: '',
+				variant: 'info',
+			},
+			showSnack: false,
+			jlemMoladosThisYear: [],
 		}
+		this.baseState = this.state;
 		this.getMoladByUserWithZipCode = this.getMoladByUserWithZipCode.bind(this);
 		this.setNewLocation = this.setNewLocation.bind(this);
+		this.setSidebarData = this.setSidebarData.bind(this);
 	}
 
-	getMoladJlem(desiredDate) {
+	setMolados(desiredDate) {
 		var hebrewYear;
 		if (desiredDate) {
 			hebrewYear = new HDate(desiredDate);
 		} else {
 			hebrewYear = new HDate();
 		}
-
 		var moladosThisYear = [];
+		//add last month of prev year to cover change-overs:
+		moladosThisYear.push(calcMolad(hebrewYear.year - 1, numMonthsInYear(hebrewYear.year - 1)));
+		//calcMolad indexes months from 1
+		//go through each month and get molad, convert from jlem time if have zipcode entered
 		for (var i = 1; i <= numMonthsInYear(hebrewYear.year); i++){
-			//console.log(calcMolad(hebrewYear.year, i));
-			moladosThisYear.push(calcMolad(hebrewYear.year, i));
+			if (this.state.displayedZip === ''){
+				moladosThisYear.push(calcMolad(hebrewYear.year, i));
+			} else {//Do conversions based on zipcode if displayed zip not '', zip may have been set earlier
+				var jlemMolad = calcMolad(hebrewYear.year, i);
+				var localMoladAsDate = this.getLocalMoladAsDate(jlemMolad, this.state.timeZone);
+				moladosThisYear.push(localMoladAsDate);
+			}
 		}
-		// console.log(moladosThisYear);
-		var hebrewMonth = getTransformedMonth(hebrewYear);
-		var molad = calcMolad(hebrewYear.year, hebrewMonth + 1);
-		var moladAsRFCString = formatRFC(molad);
+		/**
+		 * This is to make sure that in when the molados are first calculated, an array of
+		 * molados in JLem are maintained regardless of molados being calculated for other
+		 * places. This is so setNewLocation has a baseline off of which to translate times
+		 * even if user has entered multiple locations. We don't want the baseline to be
+		 * the molados at whatever location was entered before but rather Jlem. 
+		 */
+		if (this.state.displayedZip === ''){
+			this.setState({jlemMoladosThisYear: moladosThisYear});
+		}
+		//add first month of next year to cover change-overs:
+		moladosThisYear.push(calcMolad(hebrewYear.year + 1, 1));
+
 		this.setState({
-			moladAsRFCString: moladAsRFCString,
-			moladJlem: molad,
-			moladByYou: molad, //start off displaying Jerusalem, then go to other location
-			timeStampJlem: molad.getTime(),
+			currYear: hebrewYear.year,
 			moladosThisYear: moladosThisYear,
 		})
-		this.props.setMoladInSidebar({ molad: molad, location: this.state.displayedCity });
+	}
+
+	//TODO: some issue here, not converting correctly between time zones anymore
+	getLocalMoladAsDate(jlemMolad, timeZone){
+		var jlemMoladAsRFC = formatRFC(jlemMolad);
+		var moladInLocalTime = us(asia(jlemMoladAsRFC, JLEM_TZ), timeZone, "%F %T");
+		var moladAsDateObj = RFCToDateObj(moladInLocalTime);
+		return moladAsDateObj;
 	}
 
 	componentDidMount() {
-		this.getMoladJlem(new Date());
+		this.setMolados(new Date());
 	}
 
 	setNewLocation(lat, long, city) {
@@ -75,32 +95,43 @@ export default class KiddushLevana extends React.Component {
 		this.setState({
 			timeZone: timeZone,
 			displayedCity: city
-		})
-		var moladInLocalTime = us(asia(this.state.moladAsRFCString, JLEM_TZ), timeZone, "%F %T");
-		var moladByYou = RFCToDateObj(moladInLocalTime);
-		this.setState({ moladByYou: moladByYou });
-		this.props.setMoladInSidebar({ molad: moladByYou, location: city });
+		});
+		var newMoladosThisYear = []; //for new lat/long
+		var jlemMoladosThisYear = this.state.jlemMoladosThisYear;//for jlem
+		for (var i = 0; i < jlemMoladosThisYear.length; i++){
+			var jlemMolad = jlemMoladosThisYear[i];
+			var localMoladAsDate = this.getLocalMoladAsDate(jlemMolad, timeZone);
+			newMoladosThisYear.push(localMoladAsDate);
+		}
+		this.setState({moladosThisYear: newMoladosThisYear})
+	}
+
+	changeSnack(message, variant){
+		this.setState({ 
+			showSnack: true,
+			snackData: {
+				variant: variant,
+				message: message
+			}
+		});
 	}
 
 	getMoladByUserWithZipCode() {
 		var data = zipcodes.lookup(this.props.zipcode);
 		if (!data) {
-			this.setState({ showAlert: true })
+			this.changeSnack(`Unable to locate zipcode: ${this.props.zipcode}`, 'error');
 			return;
 		}
 		var lat = data.latitude;
 		var long = data.longitude;
 		var city = data.city;
+
+		this.changeSnack(`Displaying times for ${city}`, 'success');
 		this.setNewLocation(lat, long, city);
 	}
 
-	resetAlert() {
-		this.setState({
-			showAlert: false,
-		})
-	}
-
 	componentDidUpdate() {
+
 		if (this.props.zipcode && this.props.zipcode !== this.state.displayedZip) {
 			this.setState({ displayedZip: this.props.zipcode });
 			this.getMoladByUserWithZipCode();
@@ -108,26 +139,43 @@ export default class KiddushLevana extends React.Component {
 
 		if (this.props.newDate && this.props.newDate !== this.state.newDate) {
 			this.setState({ newDate: this.props.newDate });
-			this.getMoladJlem(this.props.newDate);
+			this.setMolados(this.props.newDate);
 		}
+	}
+
+	setSidebarData(opinion){
+		var data = {
+			opinion: opinion,
+			location: this.state.displayedCity
+		}
+		this.props.setSidebarData(data)
+	}
+
+	closeSnack(){
+		this.setState({
+			showSnack: false,
+		});
 	}
 
 	render() {
 		return (
 			<div>
-				{this.state.showAlert
-					? <Alert resetAlert={this.resetAlert.bind(this)} 
-						header="Zipcode Error" 
-						message="Could not find that Zip Code in the database" 
-					/> : null}
-				<h2>Displaying times for {this.state.displayedCity}</h2>
-				{this.state.moladByYou
-					? <KiddushLevanaCalendar 
+				{this.state.showSnack 
+				? 
+				<ChangeZipSnack 
+					closeSnack={this.closeSnack.bind(this)}
+					data={this.state.snackData}
+				/>
+				:
+				null}
+
+				<h2>Displaying times for {<i> {this.state.displayedCity} </i>}</h2>
+					<KiddushLevanaCalendar 
 						moladosThisYear={this.state.moladosThisYear} 
 						defDate={this.state.newDate}
 						setNewDate={this.props.setNewDate}
-						/>
-					: <LinearProgress color="secondary" />}
+						setSidebarData={this.setSidebarData}
+					/>
 			</div>
 		);
 	}

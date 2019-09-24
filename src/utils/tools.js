@@ -34,6 +34,7 @@ function numMonthsInYear(year){
     if (isLeapYear(year)) return 13;
     return 12;
 }
+
 function getTransformedMonth(hdate){
     //returns in format the calcMolad function likes, it has diff numbering scheme for months
     // var HebrewMonthTextArr = ["Tishrei", "Cheshvan", "Kislev", "Teves", "Sh'vat", "Adar", "Adar I", "Adar II", "Nisan", "Iyyar", "Sivan", "Tamuz", "Av", "Elul"]
@@ -86,6 +87,21 @@ function getTransformedMonth(hdate){
     return retMonth;
 }
 
+function getHebMonthAsString(hdate){
+    var hMonth = hdate.month;
+    var hYear = hdate.year;
+
+    if (hMonth === 12) { 
+        if (isLeapYear(hYear)){
+            return "Adar I";
+        } else {
+            return "Adar";
+        }
+    }
+    var HebrewMonthTextArr = ["Nissan", "Iyyar", "Sivan", "Tammuz", "Av", "Elul", "Tishrei", "Cheshvan", "Kislev", "Teves", "Sh'vat", "Adar", "Adar II"]
+    return HebrewMonthTextArr[hMonth - 1];
+}
+
 function RFCToDateObj(moladInLocalTime) {
     var [date, time] = moladInLocalTime.split(" ");
     var [year, month, day] = date.split("-");
@@ -93,4 +109,4 @@ function RFCToDateObj(moladInLocalTime) {
     return new Date(year, month - 1, day, hours, minutes, seconds);
 }
 
-export { isLeapYear, formatRFC, getTransformedMonth, RFCToDateObj, numMonthsInYear };
+export { isLeapYear, formatRFC, getTransformedMonth, RFCToDateObj, numMonthsInYear, getHebMonthAsString };
