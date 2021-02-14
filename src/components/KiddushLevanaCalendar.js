@@ -4,7 +4,7 @@ import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment';
 require('hebcal');
 
-const RAMA_DAYS_TILL_END_KL = 14.5305941; //half of 29 days and 793 chalakim
+const RAMA_DAYS_TILL_END_KL = 14.765297068; //half of 29 days 12 hours and 793 chalakim
 
 export default class KiddushLevanaCalendar extends React.Component {
 	constructor(props) {
