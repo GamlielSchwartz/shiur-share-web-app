@@ -15,7 +15,6 @@ import ListItem from '@material-ui/core/ListItem';
 import DisplayCard from './DisplayCard.js';
 import Cancel from '@material-ui/icons/Cancel';
 import { InputBase } from '@material-ui/core';
-import 'react-day-picker/lib/style.css';
 import { HDate } from 'hebcal';
 import { getHebMonthAsString } from '../utils/tools.js';
 
