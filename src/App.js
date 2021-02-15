@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import KiddushLevana from './components/kiddushlevana';
 import SideNav from './components/SideNav';
+import AdsenseWidget from './components/AdsenseWidget'
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -35,6 +36,7 @@ export default class App extends React.Component {
 	render() {
 		return (
 			<div>
+				<AdsenseWidget/>
 				<SideNav
 					setZipcode={this.setZipcode}
 					sidebarData={this.state.sidebarData}
