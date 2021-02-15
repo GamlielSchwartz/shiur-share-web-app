@@ -5,10 +5,10 @@ export default class AdsenseWidget extends React.Component {
  componentDidMount() {
         const installGoogleAds = () => {
           const elem = document.createElement("script");
-          elem.src =
-            "//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
-          elem.async = true;
           elem.setAttribute("data-ad-client", "ca-pub-9227562150155157");
+          elem.async = true;
+          elem.src =
+          "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
           document.head.appendChild(elem);
         };
         installGoogleAds();
