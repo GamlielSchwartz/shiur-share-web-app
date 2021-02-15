@@ -14,6 +14,7 @@
     "react-autosuggest": "^9.4.3",
     "react-big-calendar": "^0.22.0",
     "react-dom": "^16.9.0",
+    "react-helmet": "^6.1.0",
     "react-scripts": "3.1.1",
     "timezone": "^1.0.22",
     "tz-lookup": "^6.1.24",
