@@ -2,7 +2,6 @@ import React from 'react';
 import './App.css';
 import KiddushLevana from './components/kiddushlevana';
 import SideNav from './components/SideNav';
-import AdsenseWidget from './components/AdsenseWidget'
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -16,6 +15,18 @@ export default class App extends React.Component {
 		this.setNewDate = this.setNewDate.bind(this);
 		this.setSidebarData = this.setSidebarData.bind(this);
 	}
+
+	componentDidMount() {
+        const installGoogleAds = () => {
+          const elem = document.createElement("script");
+          elem.setAttribute("data-ad-client", "ca-pub-9227562150155157");
+          elem.setAttribute("async", true);
+          elem.src =
+          "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
+          document.head.appendChild(elem);
+        };
+        installGoogleAds();
+    }
 
 	setZipcode(zipcode) {
 		this.setState({ 
@@ -36,7 +47,6 @@ export default class App extends React.Component {
 	render() {
 		return (
 			<div>
-				<AdsenseWidget/>
 				<SideNav
 					setZipcode={this.setZipcode}
 					sidebarData={this.state.sidebarData}
