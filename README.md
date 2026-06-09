@@ -32,7 +32,7 @@ Opinions shown:
 - [MUI](https://mui.com/) (Material UI)
 - [kosher-zmanim](https://github.com/BehindTheMath/KosherZmanim) (zmanim engine, uses [Luxon](https://moment.github.io/luxon/))
 - [react-big-calendar](https://github.com/jquense/react-big-calendar) for the month grid
-- `zipcodes` + `tz-lookup` for zip → coordinates → timezone
+- [zippopotam.us](https://www.zippopotam.us/) for zip → coordinates and `tz-lookup` for coordinates → timezone (browser geolocation uses the same coordinate → timezone path)
 
 ## Local development
 
@@ -54,7 +54,7 @@ UI. The suite emphasizes the things most likely to be wrong:
 - The KosherJava reference cases (molad accuracy, including the DST case)
 - Kiddush Levana boundary math (3/7/15 days, halfway-between-moldos)
 - Leap-year handling (Adar I / Adar II) and chronological month ordering
-- **Zip codes across every US timezone** (`zipcodes` + `tz-lookup`) and invalid input
+- **Zip codes across every US timezone** (zippopotam.us + `tz-lookup`, with a mocked API) and invalid input
 - **International date line / timezone edge cases** — the molad is one instant
   that can render on different civil days (e.g. Friday in Jerusalem, Thursday in
   New York and Honolulu), with DST applied only where observed

@@ -7,15 +7,25 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 import ZipSearch from './components/ZipSearch';
 import CalendarView from './components/CalendarView';
 import MoladSidebar from './components/MoladSidebar';
+import MonthYearPicker from './components/MonthYearPicker';
 import OpinionDialog from './components/OpinionDialog';
 import { getKiddushLevanaMonths } from './lib/kiddushLevana';
 import { buildEvents, type KlEvent } from './lib/calendarEvents';
-import { DEFAULT_LOCATION, lookupZip, type AppLocation } from './lib/location';
+import {
+  DEFAULT_LOCATION,
+  detectLocation,
+  lookupZip,
+  type AppLocation,
+} from './lib/location';
 
 // Drive the calendar grid and all date formatting from the selected location's
 // timezone. Updated whenever the user picks a new location.
@@ -64,6 +74,27 @@ export default function App() {
     });
   }
 
+  async function handleDetectLocation() {
+    try {
+      const result = await detectLocation();
+      Settings.defaultZone = result.timeZone;
+      setLocation(result);
+      setSelected(null);
+      setSnack({
+        open: true,
+        message: `Showing times for ${result.city}`,
+        severity: 'success',
+      });
+    } catch (err) {
+      setSnack({
+        open: true,
+        message:
+          err instanceof Error ? err.message : 'Could not detect your location.',
+        severity: 'error',
+      });
+    }
+  }
+
   function handleNavigate(date: Date) {
     setReferenceDate(date);
     setSelected(null);
@@ -77,7 +108,18 @@ export default function App() {
           <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }} noWrap>
             Kiddush Levana
           </Typography>
-          <ZipSearch onSearch={handleZipSearch} />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <ZipSearch onSearch={handleZipSearch} />
+            <Tooltip title="Use my current location">
+              <IconButton
+                color="inherit"
+                onClick={handleDetectLocation}
+                aria-label="Use my current location"
+              >
+                <MyLocationIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Toolbar>
       </AppBar>
 
@@ -114,6 +156,18 @@ export default function App() {
               boxShadow: 1,
             }}
           >
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              sx={{ mb: 2 }}
+              flexWrap="wrap"
+            >
+              <Typography variant="body2" color="text.secondary">
+                Jump to
+              </Typography>
+              <MonthYearPicker date={referenceDate} onChange={handleNavigate} />
+            </Stack>
             <CalendarView
               events={events}
               date={referenceDate}
