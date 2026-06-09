@@ -85,8 +85,7 @@ export default function MoladSidebar({
             color="text.secondary"
             sx={{ display: 'block', mt: 1.5 }}
           >
-            The announced molad is Jerusalem mean time, as printed in luchos and
-            on Chabad.org. Your local time is the actual astronomical moment,
+            The announced molad is Jerusalem mean time, as printed in luchos. Your local time is the actual astronomical moment,
             which differs by the ~21-minute Local Mean Time correction (about 39
             minutes during daylight saving). The Kiddush Levana times below are
             measured from that actual moment.
