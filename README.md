@@ -38,11 +38,26 @@ Opinions shown:
 
 ```bash
 npm install
-npm run dev      # start the dev server at http://localhost:3000
-npm run build    # type-check and build to dist/
-npm run preview  # preview the production build
+npm run dev       # start the dev server at http://localhost:3000
+npm run build     # type-check and build to dist/
+npm run preview   # preview the production build
 npm run typecheck
+npm test          # run the Vitest suite once
+npm run test:watch
 ```
+
+## Tests
+
+[Vitest](https://vitest.dev/) + Testing Library cover the calculation engine and
+UI. The suite emphasizes the things most likely to be wrong:
+
+- The KosherJava reference cases (molad accuracy, including the DST case)
+- Kiddush Levana boundary math (3/7/15 days, halfway-between-moldos)
+- Leap-year handling (Adar I / Adar II) and chronological month ordering
+- **Zip codes across every US timezone** (`zipcodes` + `tz-lookup`) and invalid input
+- **International date line / timezone edge cases** — the molad is one instant
+  that can render on different civil days (e.g. Friday in Jerusalem, Thursday in
+  New York and Honolulu), with DST applied only where observed
 
 ## Deployment
 
