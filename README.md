@@ -1,68 +1,50 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Kiddush Levana
 
-## Available Scripts
+Look up the **molad** (lunar conjunction) and the **earliest and latest times to
+say Kiddush Levana** each month, for any US location.
 
-In the project directory, you can run:
+Live: <https://kiddushlevana.vercel.app>
 
-### `npm start`
+## Why the times are accurate now
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Earlier versions calculated the molad with a hand-rolled formula that treated the
+molad as Jerusalem *clock* time. The molad is traditionally expressed in
+Jerusalem **local mean time** (longitude 35.2354°), which is **20.94 minutes**
+ahead of the GMT+2 standard-time meridian — and **39.06 minutes** off in the
+other direction when DST is in effect. That introduced the discrepancy noted by
+the author of the KosherJava project.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+This version computes everything with [`kosher-zmanim`](https://github.com/BehindTheMath/KosherZmanim),
+the maintained JS/TS port of the [KosherJava Zmanim API](https://kosherjava.com/zmanim-project/javadoc-api-documentation/).
+Its `JewishCalendar` subtracts the 20.94-minute local-mean-time offset and works
+in standard time, while DST is applied correctly per location at display time.
 
-### `npm test`
+Opinions shown:
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Opinion        | Earliest               | Latest                              |
+| -------------- | ---------------------- | ----------------------------------- |
+| Majority       | 3 days after the molad | halfway between the moldos (Maharil)|
+| Shulchan Aruch | 7 days after the molad | 15 days after the molad             |
 
-### `npm run build`
+## Tech stack
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- [Vite](https://vitejs.dev/) + [React 18](https://react.dev/) + TypeScript
+- [MUI](https://mui.com/) (Material UI)
+- [kosher-zmanim](https://github.com/BehindTheMath/KosherZmanim) (zmanim engine, uses [Luxon](https://moment.github.io/luxon/))
+- [react-big-calendar](https://github.com/jquense/react-big-calendar) for the month grid
+- `zipcodes` + `tz-lookup` for zip → coordinates → timezone
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+## Local development
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm install
+npm run dev      # start the dev server at http://localhost:3000
+npm run build    # type-check and build to dist/
+npm run preview  # preview the production build
+npm run typecheck
+```
 
-### `npm run eject`
+## Deployment
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+Deployed on Vercel. The framework preset, build command, and output directory are
+declared in `vercel.json`; pushes to `master` deploy to production automatically.
