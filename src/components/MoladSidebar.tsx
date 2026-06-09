@@ -70,10 +70,27 @@ export default function MoladSidebar({
               size="small"
             />
           </Stack>
-          <Labelled
-            label={`Molad in ${locationCity}`}
-            value={formatMolad(month.molad)}
-          />
+          <Stack spacing={2}>
+            <Labelled
+              label="Molad in Jerusalem (as announced)"
+              value={formatMolad(month.moladAnnounced, month.moladChalakim)}
+            />
+            <Labelled
+              label={`Molad in ${locationCity} (actual local time)`}
+              value={formatMolad(month.molad, month.moladChalakim)}
+            />
+          </Stack>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: 'block', mt: 1.5 }}
+          >
+            The announced molad is Jerusalem mean time, as printed in luchos and
+            on Chabad.org. Your local time is the actual astronomical moment,
+            which differs by the ~21-minute Local Mean Time correction (about 39
+            minutes during daylight saving). The Kiddush Levana times below are
+            measured from that actual moment.
+          </Typography>
         </CardContent>
       </Card>
 

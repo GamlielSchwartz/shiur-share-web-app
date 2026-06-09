@@ -16,11 +16,18 @@ describe('format helpers', () => {
     expect(formatShort(base)).toBe('Feb 12, 2021, 5:58 AM');
   });
 
-  it('formatMolad appends chalakim derived from the seconds', () => {
+  it('formatMolad approximates chalakim from the seconds when none is given', () => {
     // 16s ÷ 3.333 ≈ 4.8 -> 5 chalakim
     expect(formatMolad(base)).toBe(
       'Friday, Feb 12, 2021, 5:58 AM and 5 chalakim',
     );
+  });
+
+  it('formatMolad uses an explicit (exact) chalakim when provided', () => {
+    expect(formatMolad(base, 4)).toBe(
+      'Friday, Feb 12, 2021, 5:58 AM and 4 chalakim',
+    );
+    expect(formatMolad(base, 1)).toContain('and 1 chelek');
   });
 
   it('uses the singular "chelek" for exactly one', () => {

@@ -38,6 +38,60 @@ describe('molad accuracy (KosherJava reference cases)', () => {
   });
 });
 
+describe('announced molad (Jerusalem mean time) matches Chabad/luchos', () => {
+  // The announced molad is Jerusalem mean solar time + chalakim, exactly as
+  // Chabad.org publishes it. Format it the way the table reads for comparison.
+  const announced = (m: MonthZmanim) =>
+    `${m.moladAnnounced.toFormat('ccc LLL d yyyy h:mm a')} + ${m.moladChalakim}`;
+
+  it('Adar 5781 = Fri Feb 12 2021 6:19 AM + 4 chalakim (the cited bug case)', () => {
+    const adar = find(monthsFor('2021-02-12'), 5781, 12);
+    expect(announced(adar)).toBe('Fri Feb 12 2021 6:19 AM + 4');
+  });
+
+  // Spot-checks against Chabad.org's published molad table for 5786 (2025-26),
+  // including evening molados where the announced day is the civil weekday.
+  it.each([
+    ['2025-09-22', 5786, 7, 'Mon Sep 22 2025 12:10 PM + 7'], // Tishrei
+    ['2026-02-17', 5786, 12, 'Tue Feb 17 2026 3:50 AM + 12'], // Adar
+    ['2026-05-16', 5786, 3, 'Sat May 16 2026 6:02 PM + 15'], // Sivan (evening)
+    ['2026-07-14', 5786, 5, 'Tue Jul 14 2026 7:30 PM + 17'], // Av (evening)
+  ])('molad of %s matches Chabad', (date, year, month, expected) => {
+    const m = find(monthsFor(date as string), year as number, month as number);
+    expect(announced(m)).toBe(expected);
+  });
+
+  it('the announced molad is the same instant regardless of the user timezone', () => {
+    const jlem = find(monthsFor('2021-02-12', 'Asia/Jerusalem'), 5781, 12);
+    const ny = find(monthsFor('2021-02-12', 'America/New_York'), 5781, 12);
+    expect(ny.moladAnnounced.toMillis()).toBe(jlem.moladAnnounced.toMillis());
+    expect(ny.moladAnnounced.toFormat('ccc h:mm a')).toBe('Fri 6:19 AM');
+  });
+
+  it('the announced (mean) time leads the actual instant by the LMT correction', () => {
+    const adar = find(monthsFor('2021-02-12', 'Asia/Jerusalem'), 5781, 12);
+    // Announced 6:19 AM (mean) vs actual 5:58:16 AM (Israel Standard) ≈ 21 min.
+    const diffMin =
+      (adar.moladAnnounced.toMillis() - adar.molad.toMillis()) / 60000;
+    expect(Math.round(diffMin)).toBe(21);
+  });
+
+  it('exposes the exact molad chalakim, independent of clock seconds', () => {
+    const adar = find(monthsFor('2021-02-12'), 5781, 12);
+    // Clock time is 05:58:16 (16s ≈ 5 chalakim), but the true molad is 4 chalakim.
+    expect(adar.moladChalakim).toBe(4);
+    expect(adar.molad.second).toBe(16);
+  });
+
+  it('keeps the announced molad and chalakim within valid ranges every month', () => {
+    for (const m of monthsFor('2024-03-01')) {
+      expect(m.moladAnnounced.isValid).toBe(true);
+      expect(m.moladChalakim).toBeGreaterThanOrEqual(0);
+      expect(m.moladChalakim).toBeLessThanOrEqual(17);
+    }
+  });
+});
+
 describe('Kiddush Levana boundaries', () => {
   it('earliest/latest are exact offsets from the molad', () => {
     const adar = find(monthsFor('2021-02-12'), 5781, 12);

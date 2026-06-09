@@ -17,6 +17,16 @@ export interface MonthZmanim {
   monthName: string;
   /** The molad (lunar conjunction), the true instant in the target timezone. */
   molad: DateTime;
+  /**
+   * The molad as announced in shul and printed in luchos: Jerusalem *mean*
+   * solar time, with no timezone or daylight-saving adjustment. This matches
+   * Chabad's published molad tables to the minute and chelek. It is pinned to a
+   * fixed +02:00 offset so the announced wall-clock reading is preserved no
+   * matter where it is rendered.
+   */
+  moladAnnounced: DateTime;
+  /** The exact chalakim of the molad (not derived from rounded clock seconds). */
+  moladChalakim: number;
   /** Earliest, 3 days after the molad (majority of Acharonim). */
   earliest3Days: DateTime;
   /** Earliest, 7 days after the molad (Shulchan Aruch). */
@@ -49,12 +59,37 @@ function orderedMonths(year: number): number[] {
 function computeMonth(year: number, month: number, zone: string): MonthZmanim {
   const jc = new JewishCalendar();
   jc.setJewishDate(year, month, 15);
+
+  // The molad as announced in shul / printed in luchos. KosherJava's getMolad()
+  // reports the announcement decomposition (Gregorian date, clock time, and
+  // chalakim) in Jerusalem mean solar time — this matches Chabad's published
+  // tables exactly. We pin it to a fixed +02:00 offset so the announced
+  // wall-clock reading is preserved wherever it is rendered.
+  const moladObj = jc.getMolad();
+  const moladChalakim = moladObj.getMoladChalakim();
+  const moladAnnounced = DateTime.fromObject(
+    {
+      year: moladObj.getGregorianYear(),
+      month: moladObj.getGregorianMonth() + 1,
+      day: moladObj.getGregorianDayOfMonth(),
+      hour: moladObj.getMoladHours(),
+      minute: moladObj.getMoladMinutes(),
+    },
+    { zone: 'UTC+2' },
+  );
+
+  // The true astronomical instant, after the Local Mean Time correction (~21
+  // min, or ~39 min under DST). This is what the Kiddush Levana window is
+  // measured from, shown in the user's local clock time.
+  const moladInstant = jc.getMoladAsDate();
   return {
     id: `${year}-${month}`,
     jewishYear: year,
     jewishMonth: month,
     monthName: formatter.formatMonth(jc),
-    molad: jc.getMoladAsDate().setZone(zone),
+    molad: moladInstant.setZone(zone),
+    moladAnnounced,
+    moladChalakim,
     earliest3Days: jc.getTchilasZmanKidushLevana3Days().setZone(zone),
     earliest7Days: jc.getTchilasZmanKidushLevana7Days().setZone(zone),
     sofBetweenMoldos: jc.getSofZmanKidushLevanaBetweenMoldos().setZone(zone),
