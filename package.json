@@ -5,7 +5,7 @@
   "description": "Look up molad times and the earliest/latest times to say Kiddush Levana for any location, calculated with the KosherJava zmanim engine.",
   "type": "module",
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "vite",
