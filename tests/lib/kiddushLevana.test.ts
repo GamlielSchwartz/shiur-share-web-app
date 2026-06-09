@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getKiddushLevanaMonths, type MonthZmanim } from './kiddushLevana';
+import { getKiddushLevanaMonths, type MonthZmanim } from '../../src/lib/kiddushLevana';
 
 const JLEM = 'Asia/Jerusalem';
 const HOUR_MS = 3_600_000;

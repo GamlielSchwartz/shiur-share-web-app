@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getKiddushLevanaMonths } from './kiddushLevana';
+import { getKiddushLevanaMonths } from '../../src/lib/kiddushLevana';
 
 /** Adar 5781 molad in a given zone (UTC instant 2021-02-12T03:58:16.837Z). */
 function adarMolad(zone: string) {

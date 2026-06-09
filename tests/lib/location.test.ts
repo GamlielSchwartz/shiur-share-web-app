@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lookupZip, DEFAULT_LOCATION } from './location';
+import { lookupZip, DEFAULT_LOCATION } from '../../src/lib/location';
 
 describe('DEFAULT_LOCATION', () => {
   it('is Yerushalayim at Har Habayis coordinates', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getKiddushLevanaMonths } from './kiddushLevana';
-import { buildEvents } from './calendarEvents';
+import { getKiddushLevanaMonths } from '../../src/lib/kiddushLevana';
+import { buildEvents } from '../../src/lib/calendarEvents';
 
 const months = getKiddushLevanaMonths(new Date('2021-02-12'), 'Asia/Jerusalem');
 const events = buildEvents(months);

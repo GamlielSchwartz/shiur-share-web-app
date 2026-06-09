@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { DateTime } from 'luxon';
-import { formatDateTime, formatShort, formatMolad } from './format';
+import { formatDateTime, formatShort, formatMolad } from '../../src/lib/format';
 
 const base = DateTime.fromObject(
   { year: 2021, month: 2, day: 12, hour: 5, minute: 58, second: 16 },

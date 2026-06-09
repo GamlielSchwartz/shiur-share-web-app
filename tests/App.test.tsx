@@ -5,13 +5,13 @@ import { Settings } from 'luxon';
 
 // Stub the heavy react-big-calendar wrapper; we are testing orchestration
 // (zip search -> location/timezone -> recomputed events), not the grid widget.
-vi.mock('./components/CalendarView', () => ({
+vi.mock('../src/components/CalendarView', () => ({
   default: ({ events }: { events: unknown[] }) => (
     <div data-testid="calendar">{events.length} events</div>
   ),
 }));
 
-import App from './App';
+import App from '../src/App';
 
 afterEach(() => {
   Settings.defaultZone = 'Asia/Jerusalem';

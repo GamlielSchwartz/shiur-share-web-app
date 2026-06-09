@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from '../theme';
-import MoladSidebar from './MoladSidebar';
-import { getKiddushLevanaMonths } from '../lib/kiddushLevana';
-import { buildEvents } from '../lib/calendarEvents';
+import { theme } from '../../src/theme';
+import MoladSidebar from '../../src/components/MoladSidebar';
+import { getKiddushLevanaMonths } from '../../src/lib/kiddushLevana';
+import { buildEvents } from '../../src/lib/calendarEvents';
 
 const events = buildEvents(
   getKiddushLevanaMonths(new Date('2021-02-12'), 'Asia/Jerusalem'),

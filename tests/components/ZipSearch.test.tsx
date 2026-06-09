@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from '../theme';
-import ZipSearch from './ZipSearch';
+import { theme } from '../../src/theme';
+import ZipSearch from '../../src/components/ZipSearch';
 
 function renderWithTheme(ui: React.ReactNode) {
   return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
